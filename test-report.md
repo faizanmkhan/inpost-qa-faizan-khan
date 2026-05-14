@@ -80,7 +80,7 @@ The login form has no email validation rules implemented. As long as the field i
 ---
 
 **[Medium]**  
-Authenticated user is able to manually access the /login page
+Authenticated user is able to manually access the ```/login``` page
 instead of being redirected to an authenticated area of the application.
 
 ![Missing Fullstop](screenshots/already_loggedin.png)
@@ -92,3 +92,44 @@ Logging out redirects the user to the home page instead of keeping them on the l
 
 ---
 
+## Profile page (/profile)
+
+**[High]**  
+The profile page is manually accessible ```/profile``` in a logged-out state
+and renders as a completely empty page without any user guidance.
+
+![Empty profile page](screenshots/Empty_profile.png)
+
+---
+
+**[Low]**  
+The Full Name section displays only a single name "user"
+instead of the user's full name.
+
+![Full name](screenshots/Full_name.png)
+---
+
+**[High]**  
+The membership start date is rendered as "Invalid Date"
+instead of displaying a valid formatted date.
+
+![Membership start date](screenshots/membership_date.png)
+
+---
+
+**[Medium]**  
+The profile page does not provide any functionality
+to edit or update user information.
+
+![Complete profile page](screenshots/no_update_info_option.png)
+
+---
+
+**[Medium]**  
+Parcel history section is missing.
+
+---
+
+**[Low]**  
+No address field or address-related information
+is displayed within the user profile section.
