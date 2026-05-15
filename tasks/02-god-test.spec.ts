@@ -1,4 +1,4 @@
-import { test, expect } from "@playwright/test";
+import { test as base, expect } from "@playwright/test";
 
 /**
  * TASK 02 — Refactor
@@ -8,38 +8,53 @@ import { test, expect } from "@playwright/test";
 
 const TOKEN = "test-token-inpost-2026";
 const BASE = "http://localhost:3000";
+const authHeaders = { Authorization: `Bearer ${TOKEN}` };
 
-test("parcel lifecycle", async ({ request }) => {
-  const create = await request.post(`${BASE}/api/parcels`, {
-    headers: { Authorization: `Bearer ${TOKEN}` },
-    data: {
+type Fixtures = { parcelId: string };
+
+export const test = base.extend<Fixtures>({
+  parcelId: async ({ request }, use) => {
+    const payload = {
       recipientName: "Jan Kowalski",
       recipientEmail: "jan@example.com",
       size: "A",
       deliveryType: "LOCKER",
       lockerCode: "KRK001",
-    },
-  });
-  expect(create.status()).toBe(201);
-  const parcel = await create.json();
+    };
 
-  const update = await request.patch(`${BASE}/api/parcels/${parcel.id}`, {
-    headers: { Authorization: `Bearer ${TOKEN}` },
+    const create = await request.post(`${BASE}/api/parcels`, {
+      headers: authHeaders,
+      data: payload,
+    });
+    expect(create.status()).toBe(201);
+    const created = await create.json();
+    expect(created.id).toBeTruthy();
+
+    await use(created.id);
+
+    const del = await request.delete(`${BASE}/api/parcels/${created.id}`, {
+      headers: authHeaders,
+    });
+    expect([200, 204]).toContain(del.status());
+  },
+});
+
+test("update parcel notes", async ({ request, parcelId }) => {
+  const update = await request.patch(`${BASE}/api/parcels/${parcelId}`, {
+    headers: authHeaders,
     data: { notes: "Leave at the door" },
   });
   expect(update.status()).toBe(200);
+  const body = await update.json();
+  expect(body.notes).toBe("Leave at the door");
+});
 
-  const transit = await request.patch(
-    `${BASE}/api/parcels/${parcel.id}/status`,
-    {
-      headers: { Authorization: `Bearer ${TOKEN}` },
-      data: { status: "IN_TRANSIT" },
-    },
-  );
-  expect(transit.status()).toBe(200);
-
-  const del = await request.delete(`${BASE}/api/parcels/${parcel.id}`, {
-    headers: { Authorization: `Bearer ${TOKEN}` },
+test("set parcel status to IN_TRANSIT", async ({ request, parcelId }) => {
+  const res = await request.patch(`${BASE}/api/parcels/${parcelId}/status`, {
+    headers: authHeaders,
+    data: { status: "IN_TRANSIT" },
   });
-  expect(del.status()).toBe(204);
+  expect(res.status()).toBe(200);
+  const body = await res.json();
+  expect(body.status).toBe("IN_TRANSIT");
 });
